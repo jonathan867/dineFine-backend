@@ -3,6 +3,7 @@ const express = require('express')
 const cors = require('cors');
 const mysql = require('mysql2/promise');
 const axios = require('axios');
+const fs = require('fs');
 
 const app = express()
 const port = 3001
@@ -86,6 +87,29 @@ app.get('/get-image-url/:name/:address', async (req, res) => {
         // console.error('An error occurred:', error);
         res.status(500).send('Error');
     }
+});
+
+app.get('/awake', async (req, res) => {
+    const timestamp = new Date().toISOString();
+    let log = 'Data Read :D';
+    const rand = Math.floor(Math.random() * (5)) + 1;
+	try {
+		const connection = await mysql.createConnection(process.env.DATABASE_URL);
+		await connection.query(`SELECT * FROM Restaurant LIMIT ${rand}`)
+
+		connection.end();
+	} catch (err) {
+        console.log(err);
+		log = err;
+	}
+
+    log = log + timestamp + "rand =" + rand + "\n";
+    fs.appendFile('AwakeLog.txt', log, (err) => {
+        if (err) {
+            console.error('Error writing to log file:', err);
+        }
+    });
+    res.send('Connection Completed');
 });
 
 app.listen(port, () => {
