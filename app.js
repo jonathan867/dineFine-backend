@@ -75,11 +75,11 @@ app.get('/get-image-url/:name/:address', async (req, res) => {
                 };
                 res.json(response);
             } else {
-                // console.log("No photos found.");
+                console.log("No photos found.");
                 res.json({});
             }
         } else {
-            // console.log("No Candidates.");
+            console.log("No Candidates.");
             res.json({});
         }
 
