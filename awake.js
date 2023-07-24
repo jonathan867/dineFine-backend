@@ -19,11 +19,11 @@ const Poke = async () => {
 	}
 
     log = log + timestamp + "rand =" + rand + "\n";
-    fs.appendFile('AwakeLog.txt', log, (err) => {
-        if (err) {
-            console.error('Error writing to log file:', err);
-        }
-    });
+    // fs.appendFile('AwakeLog.txt', log, (err) => {
+    //     if (err) {
+    //         console.error('Error writing to log file:', err);
+    //     }
+    // });
 };
 
 Poke();
