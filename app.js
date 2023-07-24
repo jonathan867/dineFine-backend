@@ -14,9 +14,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors()); // cross-origin resource sharing
 
 // //routes
-app.get('/find-closest/:lat/:long', async (req, res) => {
+app.get('/find-closest/:lat/:long/:maxPrice/:cuisine', async (req, res) => {
     try {
-        const { lat, long } = req.params;
+        const { lat, long, maxPrice, cuisine } = req.params;
         const connection = await mysql.createConnection(process.env.DATABASE_URL);
         partition = "";
         if (long > 97 || long < -168) {
@@ -39,13 +39,16 @@ app.get('/find-closest/:lat/:long', async (req, res) => {
                 r.PhoneNumber, r.Url, r.WebsiteUrl, r.Award, r.FacilitiesAndServices, a.Description AS AwardDescription
             FROM ${partition} r
             JOIN Award a ON r.Award = a.Distinction
+            WHERE LENGTH(r.Price) <= ${maxPrice}
+            AND ${cuisine !== "All" ? `r.Cuisine LIKE '%${cuisine}%'` : "1"}
             ORDER BY ST_Distance(r.coordinates, ST_GeomFromText('POINT(${long} ${lat})'))
             LIMIT 1
         `;
         // 1. SELECT: defines the info to retrieve. It reqires all the fields in r (Restaurant) and a new field called AwardDescription from the Description col of a (Award)
         // 2. FROM: defines r as the Restaurant partition
         // 3. JOIN: combines rows. It defines a as the table Award, and ON combines Distinctions from a to matching Awards on r
-        // 4. ORDER: sorts by distance to point
+        // 4. WHERE: includes the filters for price and cuisine
+        // 5. ORDER: sorts by distance to point
 
         const [result] = await connection.query(query);
         connection.end();
@@ -104,11 +107,11 @@ app.get('/awake', async (req, res) => {
 	}
 
     log = log + timestamp + "rand =" + rand + "\n";
-    fs.appendFile('AwakeLog.txt', log, (err) => {
-        if (err) {
-            console.error('Error writing to log file:', err);
-        }
-    });
+    // fs.appendFile('AwakeLog.txt', log, (err) => {
+    //     if (err) {
+    //         console.error('Error writing to log file:', err);
+    //     }
+    // });
     res.send('Connection Completed');
 });
 
